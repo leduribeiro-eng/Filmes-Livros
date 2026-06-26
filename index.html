@@ -221,6 +221,51 @@
 
         .checkbox-group input { width: 20px; height: 20px; cursor: pointer; }
 
+        /* Estilos da Seção de Capas Recentes */
+        .recent-posters-section {
+            margin-bottom: 25px;
+            background: #fdfdfd;
+            border: 1px dashed #cbd5e1;
+            padding: 15px;
+            border-radius: 10px;
+        }
+        .recent-posters-section h3 {
+            font-size: 14px;
+            color: var(--primary);
+            margin-bottom: 10px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        .posters-container {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 12px;
+        }
+        .poster-card {
+            background: #f1f5f9;
+            border-radius: 6px;
+            overflow: hidden;
+            aspect-ratio: 2/3;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+        .poster-card img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+        .poster-card .poster-title-fallback {
+            padding: 8px;
+            font-size: 11px;
+            font-weight: bold;
+            text-align: center;
+            color: #475569;
+        }
+
         /* Tabela com Rolagem Vertical e Horizontal */
         .table-responsive { 
             max-height: 400px;
@@ -384,6 +429,12 @@
         </div>
     </div>
 
+    <div class="recent-posters-section" id="recent-posters-block" style="display:none;">
+        <h3>Últimos Vistos</h3>
+        <div class="posters-container" id="posters-gallery">
+            </div>
+    </div>
+
     <div class="table-responsive">
         <table id="data-table">
             <thead>
@@ -459,11 +510,6 @@
         return '';
     }
 
-    function saveToLocalStorage() {
-        localStorage.setItem('movies', JSON.stringify(movies));
-        localStorage.setItem('books', JSON.stringify(books));
-    }
-
     // CARREGAMENTO AUTOMÁTICO INICIAL (GET) DA PLANILHA DO GOOGLE
     function loadFromGoogleSheets() {
         syncStatus.textContent = "Baixando dados da nuvem...";
@@ -472,7 +518,8 @@
             .then(data => {
                 if (data.movies) movies = data.movies;
                 if (data.books) books = data.books;
-                saveToLocalStorage();
+                localStorage.setItem('movies', JSON.stringify(movies));
+                localStorage.setItem('books', JSON.stringify(books));
                 renderList();
                 if (filterColumnSelect.value !== 'all') updateFilterValuesSelect();
                 syncStatus.textContent = "Sincronizado";
@@ -603,9 +650,65 @@
             if (m.id === id) { updated = { ...m, rating: ratingValue }; return updated; }
             return m;
         });
-        saveToLocalStorage();
+        localStorage.setItem('movies', JSON.stringify(movies));
+        localStorage.setItem('books', JSON.stringify(books));
         if (updated) sendToGoogleSheets("save", "movie", updated);
         if (filterColumnSelect.value === 'rating') updateFilterValuesSelect();
+    }
+
+    // Função para processar e atualizar as capas dinâmicas baseadas no OMDb com sua chave configurada
+    function updatePostersGallery() {
+        const block = document.getElementById('recent-posters-block');
+        const gallery = document.getElementById('posters-gallery');
+        
+        if (currentTab !== 'movies') {
+            block.style.display = 'none';
+            return;
+        }
+        
+        // Filtra apenas filmes vistos e ordena pelos IDs mais recentes criados/modificados
+        const seenMovies = movies.filter(m => m.seen).sort((a, b) => b.id - a.id).slice(0, 4);
+        
+        if (seenMovies.length === 0) {
+            block.style.display = 'none';
+            return;
+        }
+        
+        block.style.display = 'block';
+        gallery.innerHTML = '';
+        
+        seenMovies.forEach(movie => {
+            const card = document.createElement('div');
+            card.className = 'poster-card';
+            
+            // Cria elemento de fallback de texto caso a imagem falhe ou não ache
+            const titleFallback = document.createElement('div');
+            titleFallback.className = 'poster-title-fallback';
+            titleFallback.textContent = movie.title;
+            card.appendChild(titleFallback);
+            
+            // Requisição dinâmica para o banco de dados aberto baseado nos dados do formulário
+            const queryTitle = encodeURIComponent(movie.title);
+            const queryYear = movie.year ? `&y=${movie.year}` : '';
+            
+            // Consome o endpoint OMDb com a sua chave pessoal inserida
+            fetch(`https://www.omdbapi.com/?t=${queryTitle}${queryYear}&apikey=d9e7b14b`)
+                .then(res => res.json())
+                .then(data => {
+                    if (data && data.Poster && data.Poster !== 'N/A') {
+                        const img = document.createElement('img');
+                        img.src = data.Poster;
+                        img.alt = movie.title;
+                        img.onload = () => {
+                            card.innerHTML = ''; 
+                            card.appendChild(img);
+                        };
+                    }
+                })
+                .catch(() => {});
+                
+            gallery.appendChild(card);
+        });
     }
 
     function renderList() {
@@ -619,11 +722,15 @@
         const showOnlySeen = showSeenCheckbox.checked;
         const currentList = currentTab === 'movies' ? movies : books;
 
+        // Ordem das colunas: Filme -> Direção -> Gênero
         if (currentTab === 'movies') {
-            headerRow.innerHTML = `<th>Filme</th><th>Gênero</th><th>Direção</th><th>Lançamento</th><th>Visto</th><th>Data</th><th>Onde</th><th>Avaliar</th><th>Ações</th>`;
+            headerRow.innerHTML = `<th>Filme</th><th>Direção</th><th>Gênero</th><th>Lançamento</th><th>Visto</th><th>Data</th><th>Onde</th><th>Avaliar</th><th>Ações</th>`;
         } else {
             headerRow.innerHTML = `<th>Livro</th><th>Autor</th><th>Editora</th><th>Edição</th><th>Lido</th><th>Ações</th>`;
         }
+
+        // Atualiza as capas dos 4 últimos filmes vistos automaticamente
+        updatePostersGallery();
 
         currentList.forEach(item => {
             if (showOnlyUnseen && item.seen) return;
@@ -647,6 +754,7 @@
 
             const tr = document.createElement('tr');
 
+            // Renderização dos dados de Filmes na ordem correta
             if (currentTab === 'movies') {
                 let ratingOptions = '<option value=""></option>';
                 for (let i = 1; i <= 10; i++) {
@@ -654,8 +762,8 @@
                 }
                 tr.innerHTML = `
                     <td><strong>${item.title || '-'}</strong></td>
-                    <td>${item.genre || '-'}</td>
                     <td>${item.director || '-'}</td>
+                    <td>${item.genre || '-'}</td>
                     <td>${item.year || '-'}</td>
                     <td><span class="badge ${item.seen ? 'badge-seen' : 'badge-not-seen'}" style="cursor:pointer;" onclick="toggleSeen(${item.id})">${item.seen ? 'Visto' : 'Quero ver'}</span></td>
                     <td>${item.seen ? formatDateToBR(item.date) : '-'}</td>
@@ -715,7 +823,8 @@
                 return b;
             });
         }
-        saveToLocalStorage();
+        localStorage.setItem('movies', JSON.stringify(movies));
+        localStorage.setItem('books', JSON.stringify(books));
         if (updated) sendToGoogleSheets("save", currentTab === 'movies' ? 'movie' : 'book', updated);
         if (filterColumnSelect.value === 'seen' || filterColumnSelect.value === 'date') updateFilterValuesSelect(); else renderList();
     }
@@ -764,7 +873,8 @@
             else books.push(dataObj);
         }
 
-        saveToLocalStorage();
+        localStorage.setItem('movies', JSON.stringify(movies));
+        localStorage.setItem('books', JSON.stringify(books));
         sendToGoogleSheets("save", currentTab === 'movies' ? 'movie' : 'book', dataObj);
         resetForm();
         if (filterColumnSelect.value !== 'all') updateFilterValuesSelect(); else renderList();
@@ -807,7 +917,8 @@
             if (currentTab === 'movies') movies = movies.filter(m => m.id !== id);
             else books = books.filter(b => b.id !== id);
             
-            saveToLocalStorage();
+            localStorage.setItem('movies', JSON.stringify(movies));
+            localStorage.setItem('books', JSON.stringify(books));
             if (itemToDelete) sendToGoogleSheets("delete", currentTab === 'movies' ? 'movie' : 'book', itemToDelete);
             if (filterColumnSelect.value !== 'all') updateFilterValuesSelect(); else renderList();
         }
