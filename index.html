@@ -1,0 +1,835 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gerenciador Pessoal</title>
+    <link rel="manifest" href="manifest.json">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="Gerenciador">
+    <style>
+        :root {
+            --primary: #2b2d42;
+            --secondary: #8d99ae;
+            --bg: #edf2f4;
+            --danger: #ef233c;
+            --danger-hover: #d90429;
+            --success: #2ec4b6;
+            --white: #ffffff;
+            --text: #2b2d42;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        body {
+            background-color: var(--bg);
+            color: var(--text);
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1100px;
+            margin: 0 auto;
+            background: var(--white);
+            padding: 30px;
+            border-radius: 12px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+        }
+
+        header {
+            margin-bottom: 30px;
+            border-bottom: 2px solid var(--bg);
+            padding-bottom: 15px;
+            display: flex;
+            gap: 30px;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .tabs-wrapper {
+            display: flex;
+            gap: 30px;
+        }
+
+        .tab-btn {
+            font-size: 28px;
+            font-weight: bold;
+            color: var(--secondary);
+            cursor: pointer;
+            border: none;
+            background: none;
+            padding-bottom: 5px;
+            transition: all 0.3s;
+        }
+
+        .tab-btn.active {
+            color: var(--primary);
+            border-bottom: 4px solid var(--primary);
+        }
+
+        #sync-status {
+            font-size: 13px;
+            font-weight: 600;
+            color: #64748b;
+            background: #f1f5f9;
+            padding: 6px 12px;
+            border-radius: 20px;
+        }
+
+        /* Formulário Ajustado para Celular */
+        .form-section {
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 8px;
+            margin-bottom: 30px;
+            border: 1px solid #e9ecef;
+        }
+
+        .form-section h2 {
+            font-size: 18px;
+            margin-bottom: 15px;
+            color: var(--primary);
+        }
+
+        .form-grid {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+            margin-bottom: 15px;
+        }
+
+        @media (min-width: 600px) {
+            .form-grid {
+                display: grid;
+                grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            }
+            .form-group.col-span-2 {
+                grid-column: span 2;
+            }
+            .full-row-break {
+                grid-column: 1 / -1;
+                display: grid;
+                grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
+                gap: 15px;
+                margin-top: 5px;
+            }
+        }
+
+        .form-group {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .form-group label {
+            font-size: 13px;
+            font-weight: 600;
+            margin-bottom: 5px;
+            color: #4a5568;
+        }
+
+        .form-group input, .form-group select {
+            padding: 8px 12px;
+            border: 1px solid #cbd5e1;
+            border-radius: 6px;
+            font-size: 14px;
+            outline: none;
+        }
+
+        .form-group input:disabled, .form-group select:disabled {
+            background-color: #e2e8f0;
+            cursor: not-allowed;
+            color: #94a3b8;
+        }
+
+        .btn {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: 600;
+            font-size: 14px;
+        }
+
+        .btn-primary { background: var(--primary); color: var(--white); }
+        .btn-primary:hover { background: #1d1e2c; }
+        .btn-edit { background: #e2e8f0; color: var(--primary); }
+        .btn-danger { background: var(--danger); color: var(--white); }
+
+        /* Controles e Filtros */
+        .controls-section {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+
+        .checkboxes-container {
+            background: #e0f2fe;
+            border: 1px solid #bae6fd;
+            padding: 15px;
+            border-radius: 8px;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .filter-section-bg {
+            background: #f8f9fa;
+            border: 1px solid #e9ecef;
+            padding: 15px;
+            border-radius: 8px;
+        }
+
+        .filter-row {
+            display: flex;
+            gap: 15px;
+            flex-wrap: wrap;
+            align-items: center;
+        }
+
+        .filter-label {
+            font-size: 14px;
+            font-weight: 700;
+            color: var(--primary);
+        }
+
+        .select-filter {
+            flex: 1;
+            min-width: 200px;
+            padding: 8px 12px;
+            border: 1px solid #cbd5e1;
+            border-radius: 6px;
+            font-size: 14px;
+            background-color: var(--white);
+            outline: none;
+        }
+
+        .checkbox-group {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-weight: 700;
+            color: #0369a1;
+            cursor: pointer;
+        }
+
+        .checkbox-group input { width: 20px; height: 20px; cursor: pointer; }
+
+        /* Tabela com Rolagem Vertical e Horizontal */
+        .table-responsive { 
+            max-height: 400px;
+            overflow-y: auto;
+            overflow-x: auto;
+            -webkit-overflow-scrolling: touch;
+            border: 1px solid #e2e8f0;
+            border-radius: 6px;
+        }
+        
+        table thead th {
+            position: sticky;
+            top: 0;
+            z-index: 1;
+            background-color: #f1f5f9; 
+        }
+
+        table { 
+            width: 100%; 
+            border-collapse: collapse; 
+            text-align: left; 
+        }
+        th, td { 
+            padding: 12px 15px; 
+            border-bottom: 1px solid #e2e8f0; 
+            font-size: 14px; 
+            white-space: nowrap;
+        }
+        th { 
+            color: var(--primary); 
+            font-weight: 600; 
+        }
+        tr:hover { background-color: #f8fafc; }
+
+        .badge { padding: 4px 8px; border-radius: 12px; font-size: 12px; font-weight: 600; }
+        .badge-seen { background: #d1fae5; color: #065f46; }
+        .badge-not-seen { background: #fee2e2; color: #991b1b; }
+        .actions { display: flex; gap: 8px; }
+        .btn-sm { padding: 4px 8px; font-size: 12px; border-radius: 4px; }
+        
+        .select-rating {
+            padding: 4px 8px;
+            border: 1px solid #cbd5e1;
+            border-radius: 4px;
+            background: #fff;
+            outline: none;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <header>
+        <div class="tabs-wrapper">
+            <button class="tab-btn active" id="tab-movies" onclick="switchTab('movies')">FILMES</button>
+            <button class="tab-btn" id="tab-books" onclick="switchTab('books')">LIVROS</button>
+        </div>
+        <div id="sync-status">Sincronizando com a nuvem...</div>
+    </header>
+
+    <div class="form-section">
+        <h2 id="form-title">ADICIONAR FILME</h2>
+        <form id="main-form">
+            <input type="hidden" id="item-id">
+            
+            <div class="form-grid">
+                <div class="form-group col-span-2">
+                    <label id="lbl-title" for="title">Filme</label>
+                    <input type="text" id="title">
+                </div>
+                
+                <div class="form-group variant-movie">
+                    <label for="genre">Gênero</label>
+                    <select id="genre">
+                        <option value=""></option>
+                        <option value="Ação">Ação</option>
+                        <option value="Animação">Animação</option>
+                        <option value="Aventura">Aventura</option>
+                        <option value="Biografia">Biografia</option>
+                        <option value="Cinema de Arte">Cinema de Arte</option>
+                        <option value="Comédia">Comédia</option>
+                        <option value="Comédia Dramática (Dramédia)">Comédia Dramática (Dramédia)</option>
+                        <option value="Comédia Romântica">Comédia Romântica</option>
+                        <option value="Documentário">Documentário</option>
+                        <option value="Drama">Drama</option>
+                        <option value="Fantasia">Fantasia</option>
+                        <option value="Faroeste (Western)">Faroeste (Western)</option>
+                        <option value="Ficção Científica (Sci-Fi)">Ficção Científica (Sci-Fi)</option>
+                        <option value="Filme Noir">Filme Noir</option>
+                        <option value="Musical">Musical</option>
+                        <option value="Romance">Romance</option>
+                        <option value="Suspense (Thriller)">Suspense (Thriller)</option>
+                        <option value="Terror (Horror)">Terror (Horror)</option>
+                    </select>
+                </div>
+                <div class="form-group variant-movie">
+                    <label for="director">Direção</label>
+                    <input type="text" id="director">
+                </div>
+                <div class="form-group variant-movie">
+                    <label for="year">Lançamento</label>
+                    <input type="number" id="year">
+                </div>
+
+                <div class="form-group variant-book" style="display:none;">
+                    <label for="author">Autor</label>
+                    <input type="text" id="author">
+                </div>
+                <div class="form-group variant-book" style="display:none;">
+                    <label for="publisher">Editora</label>
+                    <input type="text" id="publisher">
+                </div>
+                <div class="form-group variant-book" style="display:none;">
+                    <label for="edition">Edição</label>
+                    <input type="text" id="edition">
+                </div>
+
+                <div class="full-row-break">
+                    <div class="form-group">
+                        <label id="lbl-seen" for="seen">Visto</label>
+                        <select id="seen" onchange="toggleFormInputs()">
+                            </select>
+                    </div>
+                    <div class="form-group variant-movie">
+                        <label for="date">Data</label>
+                        <input type="date" id="date">
+                    </div>
+                    <div class="form-group variant-movie">
+                        <label for="where">Onde</label>
+                        <input type="text" id="where">
+                    </div>
+                </div>
+            </div>
+            
+            <button type="submit" class="btn btn-primary" id="btn-submit">Salvar Filme</button>
+            <button type="button" class="btn btn-edit" id="btn-cancel" style="display:none;" onclick="resetForm()">Cancelar</button>
+        </form>
+    </div>
+
+    <div class="controls-section">
+        <div class="filter-section-bg">
+            <div class="filter-row">
+                <span class="filter-label">Filtrar por:</span>
+                <select id="filter-column" class="select-filter" onchange="updateFilterValuesSelect()">
+                    </select>
+                <select id="filter-value" class="select-filter" onchange="renderList()" disabled>
+                    <option value="">Selecione uma opção...</option>
+                </select>
+            </div>
+        </div>
+
+        <div class="checkboxes-container">
+            <label class="checkbox-group">
+                <input type="checkbox" id="show-unseen" onchange="handleUnseenCheckbox()">
+                <span id="lbl-checkbox-unseen">Filmes que quero assistir</span>
+            </label>
+            <label class="checkbox-group">
+                <input type="checkbox" id="show-seen" onchange="handleSeenCheckbox()">
+                <span id="lbl-checkbox-seen">Filmes vistos</span>
+            </label>
+        </div>
+    </div>
+
+    <div class="table-responsive">
+        <table id="data-table">
+            <thead>
+                <tr id="table-header">
+                    </tr>
+            </thead>
+            <tbody id="data-list"></tbody>
+        </table>
+    </div>
+</div>
+
+<script>
+    const GOOGLE_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbxJJCfcKrbyhcrdH3SBwGrv50Z-uJvjs6xXX-uSQPU7GeVT83QhkkJISE6vEBo1ueDUOw/exec";
+
+    let currentTab = 'movies'; 
+
+    let movies = JSON.parse(localStorage.getItem('movies')) || [];
+    let books = JSON.parse(localStorage.getItem('books')) || [];
+
+    const mainForm = document.getElementById('main-form');
+    const itemIdInput = document.getElementById('item-id');
+    const titleInput = document.getElementById('title');
+    const genreInput = document.getElementById('genre');
+    const directorInput = document.getElementById('director');
+    const yearInput = document.getElementById('year');
+    const authorInput = document.getElementById('author');
+    const publisherInput = document.getElementById('publisher');
+    const editionInput = document.getElementById('edition');
+    const dateInput = document.getElementById('date');
+    const whereInput = document.getElementById('where');
+    const seenInput = document.getElementById('seen');
+    const showUnseenCheckbox = document.getElementById('show-unseen');
+    const showSeenCheckbox = document.getElementById('show-seen');
+    
+    const formTitle = document.getElementById('form-title');
+    const btnSubmit = document.getElementById('btn-submit');
+    const btnCancel = document.getElementById('btn-cancel');
+    const filterColumnSelect = document.getElementById('filter-column');
+    const filterValueSelect = document.getElementById('filter-value');
+    const syncStatus = document.getElementById('sync-status');
+
+    function formatDateToBR(dateStr) {
+        if (!dateStr) return '';
+        if (dateStr.includes('/')) return dateStr; 
+        
+        if (dateStr.includes('T')) {
+            dateStr = dateStr.split('T')[0];
+        }
+        
+        const parts = dateStr.split('-');
+        if (parts.length === 3) return `${parts[2]}/${parts[1]}/${parts[0]}`;
+        return dateStr;
+    }
+
+    function formatDateToISO(dateStr) {
+        if (!dateStr) return '';
+        if (dateStr.includes('-')) return dateStr;
+        const parts = dateStr.split('/');
+        if (parts.length === 3) return `${parts[2]}-${parts[1]}-${parts[0]}`;
+        return dateStr;
+    }
+
+    function getYearFromDate(dateStr) {
+        if (!dateStr) return '';
+        if (dateStr.includes('/')) {
+            const parts = dateStr.split('/');
+            return parts[2] || '';
+        }
+        if (dateStr.includes('-')) {
+            const parts = dateStr.split('-');
+            return parts[0] || '';
+        }
+        return '';
+    }
+
+    function saveToLocalStorage() {
+        localStorage.setItem('movies', JSON.stringify(movies));
+        localStorage.setItem('books', JSON.stringify(books));
+    }
+
+    // CARREGAMENTO AUTOMÁTICO INICIAL (GET) DA PLANILHA DO GOOGLE
+    function loadFromGoogleSheets() {
+        syncStatus.textContent = "Baixando dados da nuvem...";
+        fetch(GOOGLE_SCRIPT_URL)
+            .then(res => res.json())
+            .then(data => {
+                if (data.movies) movies = data.movies;
+                if (data.books) books = data.books;
+                saveToLocalStorage();
+                renderList();
+                if (filterColumnSelect.value !== 'all') updateFilterValuesSelect();
+                syncStatus.textContent = "Sincronizado";
+            })
+            .catch(err => {
+                console.error("Erro ao sincronizar leitura:", err);
+                syncStatus.textContent = "Modo Offline (LocalStorage)";
+            });
+    }
+
+    function switchTab(tab) {
+        currentTab = tab;
+        document.getElementById('tab-movies').classList.toggle('active', tab === 'movies');
+        document.getElementById('tab-books').classList.toggle('active', tab === 'books');
+        
+        document.querySelectorAll('.variant-movie').forEach(el => el.style.display = tab === 'movies' ? 'flex' : 'none');
+        document.querySelectorAll('.variant-book').forEach(el => el.style.display = tab === 'books' ? 'flex' : 'none');
+        
+        if (tab === 'movies') {
+            document.getElementById('lbl-title').textContent = "Filme";
+            document.getElementById('lbl-seen').textContent = "Visto";
+            document.getElementById('lbl-checkbox-unseen').textContent = "Filmes que quero assistir";
+            document.getElementById('lbl-checkbox-seen').textContent = "Filmes vistos";
+            seenInput.innerHTML = '<option value="false">Quero ver</option><option value="true">Visto</option>';
+        } else {
+            document.getElementById('lbl-title').textContent = "Livro";
+            document.getElementById('lbl-seen').textContent = "Lido";
+            document.getElementById('lbl-checkbox-unseen').textContent = "Livros que quero ler";
+            document.getElementById('lbl-checkbox-seen').textContent = "Livros lidos";
+            seenInput.innerHTML = '<option value="false">Quero ler</option><option value="true">Lido</option>';
+        }
+
+        showUnseenCheckbox.checked = false;
+        showSeenCheckbox.checked = false;
+        resetForm();
+        setupFilterColumns();
+        renderList();
+    }
+
+    function setupFilterColumns() {
+        if (currentTab === 'movies') {
+            filterColumnSelect.innerHTML = `
+                <option value="all">Mostrar Todos</option>
+                <option value="genre">Gênero</option>
+                <option value="director">Direção</option>
+                <option value="year">Lançamento</option>
+                <option value="seen">Visto</option>
+                <option value="date">Data (Ano)</option>
+                <option value="where">Onde</option>
+                <option value="rating">Avaliar</option>
+            `;
+        } else {
+            filterColumnSelect.innerHTML = `
+                <option value="all">Mostrar Todos</option>
+                <option value="author">Autor</option>
+                <option value="publisher">Editora</option>
+                <option value="edition">Edição</option>
+                <option value="seen">Lido</option>
+            `;
+        }
+        filterValueSelect.innerHTML = '<option value="">Selecione uma opção...</option>';
+        filterValueSelect.disabled = true;
+    }
+
+    function toggleFormInputs() {
+        if (currentTab === 'movies') {
+            if (seenInput.value === 'false') {
+                dateInput.disabled = true; dateInput.value = '';
+                whereInput.disabled = true; whereInput.value = '';
+            } else {
+                dateInput.disabled = false; whereInput.disabled = false;
+            }
+        }
+    }
+
+    function handleUnseenCheckbox() { 
+        if (showUnseenCheckbox.checked) showSeenCheckbox.checked = false;
+        renderList(); 
+    }
+    
+    function handleSeenCheckbox() { 
+        if (showSeenCheckbox.checked) showUnseenCheckbox.checked = false;
+        renderList(); 
+    }
+
+    function updateFilterValuesSelect() {
+        const column = filterColumnSelect.value;
+        if (column === 'all') {
+            filterValueSelect.innerHTML = '<option value="">Selecione uma opção...</option>';
+            filterValueSelect.disabled = true;
+            renderList();
+            return;
+        }
+
+        filterValueSelect.disabled = false;
+        const uniqueValues = new Set();
+        const currentList = currentTab === 'movies' ? movies : books;
+
+        currentList.forEach(item => {
+            let val = item[column];
+            if (column === 'seen') {
+                if (currentTab === 'movies') val = item.seen ? 'Visto' : 'Quero ver';
+                else val = item.seen ? 'Lido' : 'Quero ler';
+            }
+            if (column === 'date' && currentTab === 'movies') {
+                val = getYearFromDate(item.date);
+            }
+            if (val !== undefined && val !== null && val !== '') {
+                uniqueValues.add(val.toString());
+            }
+        });
+
+        const sortedValues = Array.from(uniqueValues).sort((a, b) => a.localeCompare(b, undefined, {numeric: true, sensitivity: 'base'}));
+        filterValueSelect.innerHTML = '<option value="all_values">Todos os valores de ' + filterColumnSelect.options[filterColumnSelect.selectedIndex].text + '</option>';
+        
+        sortedValues.forEach(val => {
+            const opt = document.createElement('option');
+            opt.value = val; opt.textContent = val;
+            filterValueSelect.appendChild(opt);
+        });
+
+        renderList();
+    }
+
+    function changeRating(id, ratingValue) {
+        let updated = null;
+        movies = movies.map(m => {
+            if (m.id === id) { updated = { ...m, rating: ratingValue }; return updated; }
+            return m;
+        });
+        saveToLocalStorage();
+        if (updated) sendToGoogleSheets("save", "movie", updated);
+        if (filterColumnSelect.value === 'rating') updateFilterValuesSelect();
+    }
+
+    function renderList() {
+        const headerRow = document.getElementById('table-header');
+        const tbody = document.getElementById('data-list');
+        tbody.innerHTML = '';
+
+        const column = filterColumnSelect.value;
+        const filterVal = filterValueSelect.value;
+        const showOnlyUnseen = showUnseenCheckbox.checked;
+        const showOnlySeen = showSeenCheckbox.checked;
+        const currentList = currentTab === 'movies' ? movies : books;
+
+        if (currentTab === 'movies') {
+            headerRow.innerHTML = `<th>Filme</th><th>Gênero</th><th>Direção</th><th>Lançamento</th><th>Visto</th><th>Data</th><th>Onde</th><th>Avaliar</th><th>Ações</th>`;
+        } else {
+            headerRow.innerHTML = `<th>Livro</th><th>Autor</th><th>Editora</th><th>Edição</th><th>Lido</th><th>Ações</th>`;
+        }
+
+        currentList.forEach(item => {
+            if (showOnlyUnseen && item.seen) return;
+            if (showOnlySeen && !item.seen) return;
+
+            let matchesFilter = true;
+            if (column !== 'all' && filterVal !== 'all_values' && filterVal !== '') {
+                let itemVal = item[column];
+                if (column === 'seen') {
+                    if (currentTab === 'movies') itemVal = item.seen ? 'Visto' : 'Quero ver';
+                    else itemVal = item.seen ? 'Lido' : 'Quero ler';
+                }
+                if (column === 'date' && currentTab === 'movies') {
+                    itemVal = getYearFromDate(item.date);
+                }
+                itemVal = (itemVal || '').toString();
+                if (itemVal !== filterVal) matchesFilter = false;
+            }
+
+            if (!matchesFilter) return;
+
+            const tr = document.createElement('tr');
+
+            if (currentTab === 'movies') {
+                let ratingOptions = '<option value=""></option>';
+                for (let i = 1; i <= 10; i++) {
+                    ratingOptions += `<option value="${i}" ${item.rating == i ? 'selected' : ''}>${i}</option>`;
+                }
+                tr.innerHTML = `
+                    <td><strong>${item.title || '-'}</strong></td>
+                    <td>${item.genre || '-'}</td>
+                    <td>${item.director || '-'}</td>
+                    <td>${item.year || '-'}</td>
+                    <td><span class="badge ${item.seen ? 'badge-seen' : 'badge-not-seen'}" style="cursor:pointer;" onclick="toggleSeen(${item.id})">${item.seen ? 'Visto' : 'Quero ver'}</span></td>
+                    <td>${item.seen ? formatDateToBR(item.date) : '-'}</td>
+                    <td>${item.seen ? (item.where || '-') : '-'}</td>
+                    <td><select class="select-rating" onchange="changeRating(${item.id}, this.value)">${ratingOptions}</select></td>
+                    <td class="actions">
+                        <button class="btn btn-sm btn-edit" onclick="editItem(${item.id})">Editar</button>
+                        <button class="btn btn-sm btn-danger" onclick="deleteItem(${item.id})">Excluir</button>
+                    </td>
+                `;
+            } else {
+                tr.innerHTML = `
+                    <td><strong>${item.title || '-'}</strong></td>
+                    <td>${item.author || '-'}</td>
+                    <td>${item.publisher || '-'}</td>
+                    <td>${item.edition || '-'}</td>
+                    <td><span class="badge ${item.seen ? 'badge-seen' : 'badge-not-seen'}" style="cursor:pointer;" onclick="toggleSeen(${item.id})">${item.seen ? 'Lido' : 'Quero ler'}</span></td>
+                    <td class="actions">
+                        <button class="btn btn-sm btn-edit" onclick="editItem(${item.id})">Editar</button>
+                        <button class="btn btn-sm btn-danger" onclick="deleteItem(${item.id})">Excluir</button>
+                    </td>
+                `;
+            }
+            tbody.appendChild(tr);
+        });
+    }
+
+    function toggleSeen(id) {
+        let updated = null;
+        if (currentTab === 'movies') {
+            movies = movies.map(m => {
+                if (m.id === id) {
+                    const nextState = !m.seen;
+                    let nextDate = m.date; let nextWhere = m.where;
+                    if (nextState) {
+                        const defaultDateISO = new Date().toISOString().split('T')[0];
+                        const defaultDateBR = formatDateToBR(defaultDateISO);
+                        const inputDate = prompt("Data em que assistiu (DD/MM/AAAA):", defaultDateBR);
+                        
+                        if (inputDate !== null && inputDate !== '') {
+                            if (inputDate.includes('-')) nextDate = formatDateToBR(inputDate);
+                            else nextDate = inputDate;
+                        } else {
+                            nextDate = defaultDateBR;
+                        }
+                        
+                        const inputWhere = prompt("Onde você assistiu?", m.where || "");
+                        nextWhere = inputWhere !== null ? inputWhere : m.where;
+                    } else { nextDate = ''; nextWhere = ''; }
+                    updated = { ...m, seen: nextState, date: nextDate, where: nextWhere }; return updated;
+                }
+                return m;
+            });
+        } else {
+            books = books.map(b => {
+                if (b.id === id) { updated = { ...b, seen: !b.seen }; return updated; }
+                return b;
+            });
+        }
+        saveToLocalStorage();
+        if (updated) sendToGoogleSheets("save", currentTab === 'movies' ? 'movie' : 'book', updated);
+        if (filterColumnSelect.value === 'seen' || filterColumnSelect.value === 'date') updateFilterValuesSelect(); else renderList();
+    }
+
+    function sendToGoogleSheets(action, type, itemObj) {
+        syncStatus.textContent = "Enviando alterações...";
+        fetch(GOOGLE_SCRIPT_URL, {
+            method: "POST",
+            mode: "no-cors",
+            headers: { "Content-Type": "text/plain" },
+            body: JSON.stringify({ action: action, type: type, item: itemObj })
+        })
+        .then(() => { syncStatus.textContent = "Sincronizado"; })
+        .catch(err => { 
+            console.error("Erro na sincronização:", err);
+            syncStatus.textContent = "Salvo apenas localmente (Offline)";
+        });
+    }
+
+    mainForm.addEventListener('submit', function(e) {
+        e.preventDefault();
+        const id = itemIdInput.value;
+        
+        let dataObj = {
+            id: id ? parseInt(id) : Date.now(),
+            title: titleInput.value,
+            seen: seenInput.value === 'true'
+        };
+
+        if (currentTab === 'movies') {
+            dataObj.genre = genreInput.value;
+            dataObj.director = directorInput.value;
+            dataObj.year = yearInput.value ? parseInt(yearInput.value) : '';
+            dataObj.where = seenInput.value === 'true' ? whereInput.value : '';
+            dataObj.date = seenInput.value === 'true' ? formatDateToBR(dateInput.value) : '';
+            dataObj.rating = id ? (movies.find(m => m.id == id)?.rating || '') : '';
+            
+            if (id) movies = movies.map(m => m.id == id ? dataObj : m);
+            else movies.push(dataObj);
+        } else {
+            dataObj.author = authorInput.value;
+            dataObj.publisher = publisherInput.value;
+            dataObj.edition = editionInput.value;
+            
+            if (id) books = books.map(b => b.id == id ? dataObj : b);
+            else books.push(dataObj);
+        }
+
+        saveToLocalStorage();
+        sendToGoogleSheets("save", currentTab === 'movies' ? 'movie' : 'book', dataObj);
+        resetForm();
+        if (filterColumnSelect.value !== 'all') updateFilterValuesSelect(); else renderList();
+    });
+
+    window.editItem = function(id) {
+        const list = currentTab === 'movies' ? movies : books;
+        const item = list.find(i => i.id === id);
+        if (!item) return;
+
+        itemIdInput.value = item.id;
+        titleInput.value = item.title || '';
+        seenInput.value = (item.seen || false).toString();
+
+        if (currentTab === 'movies') {
+            genreInput.value = item.genre || '';
+            directorInput.value = item.director || '';
+            yearInput.value = item.year || '';
+            toggleFormInputs();
+            dateInput.value = item.date ? formatDateToISO(item.date) : '';
+            whereInput.value = item.where || '';
+            formTitle.textContent = "EDITAR FILME";
+            btnSubmit.textContent = "Atualizar Filme";
+        } else {
+            authorInput.value = item.author || '';
+            publisherInput.value = item.publisher || '';
+            editionInput.value = item.edition || '';
+            formTitle.textContent = "EDITAR LIVRO";
+            btnSubmit.textContent = "Atualizar Livro";
+        }
+        btnCancel.style.display = "inline-block";
+    }
+
+    window.deleteItem = function(id) {
+        const text = currentTab === 'movies' ? "este filme?" : "este livro?";
+        if (confirm("Tem certeza que deseja excluir " + text)) {
+            const list = currentTab === 'movies' ? movies : books;
+            const itemToDelete = list.find(i => i.id === id);
+            
+            if (currentTab === 'movies') movies = movies.filter(m => m.id !== id);
+            else books = books.filter(b => b.id !== id);
+            
+            saveToLocalStorage();
+            if (itemToDelete) sendToGoogleSheets("delete", currentTab === 'movies' ? 'movie' : 'book', itemToDelete);
+            if (filterColumnSelect.value !== 'all') updateFilterValuesSelect(); else renderList();
+        }
+    }
+
+    window.resetForm = function() {
+        mainForm.reset();
+        itemIdInput.value = '';
+        toggleFormInputs();
+        formTitle.textContent = currentTab === 'movies' ? "ADICIONAR FILME" : "ADICIONAR LIVRO";
+        btnSubmit.textContent = currentTab === 'movies' ? "Salvar Filme" : "Salvar Livro";
+        btnCancel.style.display = "none";
+    }
+
+    switchTab('movies');
+    loadFromGoogleSheets();
+
+    if ('serviceWorker' in navigator) {
+        window.addEventListener('load', () => {
+            navigator.serviceWorker.register('./service-worker.js').catch(err => console.log(err));
+        });
+    }
+</script>
+</body>
+</html>
