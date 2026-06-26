@@ -221,13 +221,14 @@
 
         .checkbox-group input { width: 20px; height: 20px; cursor: pointer; }
 
-        /* Estilos da Seção de Capas Recentes */
+        /* Estilos da Seção de Capas Recentes Ajustado para Deslizar */
         .recent-posters-section {
             margin-bottom: 25px;
             background: #fdfdfd;
             border: 1px dashed #cbd5e1;
             padding: 15px;
             border-radius: 10px;
+            overflow: hidden;
         }
         .recent-posters-section h3 {
             font-size: 14px;
@@ -237,10 +238,14 @@
             letter-spacing: 0.5px;
         }
         .posters-container {
-            display: grid;
-            grid-template-columns: repeat(4, 1fr);
+            display: flex;
             gap: 12px;
+            overflow-x: auto;
+            scroll-behavior: smooth;
+            -webkit-overflow-scrolling: touch;
+            padding-bottom: 5px;
         }
+        /* Força cada card a ocupar exatamente o tamanho proporcional para caberem 4 na tela */
         .poster-card {
             background: #f1f5f9;
             border-radius: 6px;
@@ -252,6 +257,14 @@
             justify-content: center;
             position: relative;
             box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+            flex: 0 0 calc((100% - 36px) / 4); 
+            min-width: 80px;
+        }
+        @media (max-width: 600px) {
+            /* Em telas muito pequenas de celular, exibe 3.5 itens para sinalizar que dá para deslizar */
+            .poster-card {
+                flex: 0 0 calc((100% - 24px) / 3.5);
+            }
         }
         .poster-card img {
             width: 100%;
@@ -656,7 +669,7 @@
         if (filterColumnSelect.value === 'rating') updateFilterValuesSelect();
     }
 
-    // Função para processar e atualizar as capas dinâmicas baseadas no OMDb com sua chave configurada
+    // Função para processar e atualizar as capas dinâmicas baseadas no OMDb (Limite alterado para 10 itens)
     function updatePostersGallery() {
         const block = document.getElementById('recent-posters-block');
         const gallery = document.getElementById('posters-gallery');
@@ -666,8 +679,8 @@
             return;
         }
         
-        // Filtra apenas filmes vistos e ordena pelos IDs mais recentes criados/modificados
-        const seenMovies = movies.filter(m => m.seen).sort((a, b) => b.id - a.id).slice(0, 4);
+        // Filtra apenas filmes vistos e ordena pelos IDs mais recentes (busca os últimos 10 itens)
+        const seenMovies = movies.filter(m => m.seen).sort((a, b) => b.id - a.id).slice(0, 10);
         
         if (seenMovies.length === 0) {
             block.style.display = 'none';
@@ -687,7 +700,6 @@
             titleFallback.textContent = movie.title;
             card.appendChild(titleFallback);
             
-            // Requisição dinâmica para o banco de dados aberto baseado nos dados do formulário
             const queryTitle = encodeURIComponent(movie.title);
             const queryYear = movie.year ? `&y=${movie.year}` : '';
             
@@ -729,7 +741,7 @@
             headerRow.innerHTML = `<th>Livro</th><th>Autor</th><th>Editora</th><th>Edição</th><th>Lido</th><th>Ações</th>`;
         }
 
-        // Atualiza as capas dos 4 últimos filmes vistos automaticamente
+        // Atualiza as capas dos últimos filmes vistos automaticamente
         updatePostersGallery();
 
         currentList.forEach(item => {
