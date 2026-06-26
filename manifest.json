@@ -1,6 +1,6 @@
 {
-  "name": "Gerenciador Pessoal",
-  "short_name": "Gerenciador",
+  "name": "Filmes e Livros",
+  "short_name": "Filmes e Livros",
   "start_url": "./index.html",
   "display": "standalone",
   "background_color": "#edf2f4",
@@ -8,7 +8,7 @@
   "orientation": "portrait",
   "icons": [
     {
-      "src": "https://cdn-icons-png.flaticon.com/512/3176/3176363.png",
+      "src": "./icone.png",
       "sizes": "512x512",
       "type": "image/png",
       "purpose": "any maskable"
