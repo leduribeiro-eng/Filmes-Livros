@@ -223,7 +223,7 @@
 
         /* Estilos da Seção de Capas Recentes Ajustado para Deslizar */
         .recent-posters-section {
-            margin-bottom: 25px;
+            margin-bottom: 15px;
             background: #fdfdfd;
             border: 1px dashed #cbd5e1;
             padding: 15px;
@@ -277,6 +277,13 @@
             font-weight: bold;
             text-align: center;
             color: #475569;
+        }
+
+        /* Container do Botão de Detalhes alinhado à direita entre o carrossel e a tabela */
+        .details-toggle-container {
+            display: flex;
+            justify-content: flex-end;
+            margin-bottom: 15px;
         }
 
         /* Tabela com Rolagem Vertical e Horizontal */
@@ -448,6 +455,10 @@
             </div>
     </div>
 
+    <div class="details-toggle-container">
+        <button type="button" class="btn btn-sm btn-edit" id="btn-toggle-details" onclick="toggleMovieDetails()">Exibir detalhes</button>
+    </div>
+
     <div class="table-responsive">
         <table id="data-table">
             <thead>
@@ -463,6 +474,7 @@
     const GOOGLE_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbxJJCfcKrbyhcrdH3SBwGrv50Z-uJvjs6xXX-uSQPU7GeVT83QhkkJISE6vEBo1ueDUOw/exec";
 
     let currentTab = 'movies'; 
+    let showMovieDetails = false;
 
     let movies = JSON.parse(localStorage.getItem('movies')) || [];
     let books = JSON.parse(localStorage.getItem('books')) || [];
@@ -481,6 +493,7 @@
     const seenInput = document.getElementById('seen');
     const showUnseenCheckbox = document.getElementById('show-unseen');
     const showSeenCheckbox = document.getElementById('show-seen');
+    const btnToggleDetails = document.getElementById('btn-toggle-details');
     
     const formTitle = document.getElementById('form-title');
     const btnSubmit = document.getElementById('btn-submit');
@@ -508,6 +521,12 @@
         const parts = dateStr.split('/');
         if (parts.length === 3) return `${parts[2]}-${parts[1]}-${parts[0]}`;
         return dateStr;
+    }
+
+    function parseDateForSort(dateStr) {
+        if (!dateStr) return 0;
+        const iso = formatDateToISO(dateStr);
+        return new Date(iso).getTime() || 0;
     }
 
     function getYearFromDate(dateStr) {
@@ -551,6 +570,10 @@
         document.querySelectorAll('.variant-movie').forEach(el => el.style.display = tab === 'movies' ? 'flex' : 'none');
         document.querySelectorAll('.variant-book').forEach(el => el.style.display = tab === 'books' ? 'flex' : 'none');
         
+        if (btnToggleDetails) {
+            btnToggleDetails.style.display = tab === 'movies' ? 'inline-block' : 'none';
+        }
+
         if (tab === 'movies') {
             document.getElementById('lbl-title').textContent = "Filme";
             document.getElementById('lbl-seen').textContent = "Visto";
@@ -569,6 +592,14 @@
         showSeenCheckbox.checked = false;
         resetForm();
         setupFilterColumns();
+        renderList();
+    }
+
+    function toggleMovieDetails() {
+        showMovieDetails = !showMovieDetails;
+        if (btnToggleDetails) {
+            btnToggleDetails.textContent = showMovieDetails ? 'Ocultar detalhes' : 'Exibir detalhes';
+        }
         renderList();
     }
 
@@ -669,7 +700,7 @@
         if (filterColumnSelect.value === 'rating') updateFilterValuesSelect();
     }
 
-    // Função para processar e atualizar as capas dinâmicas baseadas no OMDb (Limite alterado para 10 itens)
+    // Função para processar e atualizar as capas dinâmicas (OMDb API com fallback para iTunes Search API) ordenadas por data
     function updatePostersGallery() {
         const block = document.getElementById('recent-posters-block');
         const gallery = document.getElementById('posters-gallery');
@@ -679,8 +710,11 @@
             return;
         }
         
-        // Filtra apenas filmes vistos e ordena pelos IDs mais recentes (busca os últimos 10 itens)
-        const seenMovies = movies.filter(m => m.seen).sort((a, b) => b.id - a.id).slice(0, 10);
+        // Filtra filmes vistos, ordena por data (do visto por último até o mais antigo) e pega os 10 primeiros
+        const seenMovies = movies
+            .filter(m => m.seen)
+            .sort((a, b) => parseDateForSort(b.date) - parseDateForSort(a.date))
+            .slice(0, 10);
         
         if (seenMovies.length === 0) {
             block.style.display = 'none';
@@ -694,7 +728,6 @@
             const card = document.createElement('div');
             card.className = 'poster-card';
             
-            // Cria elemento de fallback de texto caso a imagem falhe ou não ache
             const titleFallback = document.createElement('div');
             titleFallback.className = 'poster-title-fallback';
             titleFallback.textContent = movie.title;
@@ -703,7 +736,7 @@
             const queryTitle = encodeURIComponent(movie.title);
             const queryYear = movie.year ? `&y=${movie.year}` : '';
             
-            // Consome o endpoint OMDb com a sua chave pessoal inserida
+            // 1ª Opção: OMDb API
             fetch(`https://www.omdbapi.com/?t=${queryTitle}${queryYear}&apikey=d9e7b14b`)
                 .then(res => res.json())
                 .then(data => {
@@ -715,9 +748,43 @@
                             card.innerHTML = ''; 
                             card.appendChild(img);
                         };
+                    } else {
+                        // 2ª Opção (Fallback): iTunes Search API caso a primeira falhe
+                        fetch(`https://itunes.apple.com/search?term=${queryTitle}&media=movie&entity=movie&limit=1`)
+                            .then(res => res.json())
+                            .then(itunesData => {
+                                if (itunesData && itunesData.results && itunesData.results.length > 0 && itunesData.results[0].artworkUrl100) {
+                                    const posterUrl = itunesData.results[0].artworkUrl100.replace('100x100bb.jpg', '600x600bb.jpg');
+                                    const img = document.createElement('img');
+                                    img.src = posterUrl;
+                                    img.alt = movie.title;
+                                    img.onload = () => {
+                                        card.innerHTML = ''; 
+                                        card.appendChild(img);
+                                    };
+                                }
+                            })
+                            .catch(() => {});
                     }
                 })
-                .catch(() => {});
+                .catch(() => {
+                    // Fallback de rede para iTunes caso a 1ª opção falhe na requisição
+                    fetch(`https://itunes.apple.com/search?term=${queryTitle}&media=movie&entity=movie&limit=1`)
+                        .then(res => res.json())
+                        .then(itunesData => {
+                            if (itunesData && itunesData.results && itunesData.results.length > 0 && itunesData.results[0].artworkUrl100) {
+                                const posterUrl = itunesData.results[0].artworkUrl100.replace('100x100bb.jpg', '600x600bb.jpg');
+                                const img = document.createElement('img');
+                                img.src = posterUrl;
+                                img.alt = movie.title;
+                                img.onload = () => {
+                                    card.innerHTML = ''; 
+                                    card.appendChild(img);
+                                };
+                            }
+                        })
+                        .catch(() => {});
+                });
                 
             gallery.appendChild(card);
         });
@@ -732,16 +799,25 @@
         const filterVal = filterValueSelect.value;
         const showOnlyUnseen = showUnseenCheckbox.checked;
         const showOnlySeen = showSeenCheckbox.checked;
-        const currentList = currentTab === 'movies' ? movies : books;
+        
+        let currentList = currentTab === 'movies' ? [...movies] : [...books];
 
-        // Ordem das colunas: Filme -> Direção -> Gênero
+        // Se "Filmes Vistos" estiver marcado, ordena do visto por último até o mais antigo segundo a coluna data
+        if (currentTab === 'movies' && showOnlySeen) {
+            currentList.sort((a, b) => parseDateForSort(b.date) - parseDateForSort(a.date));
+        }
+
+        // Definição das colunas da tabela de acordo com o modo de exibição de detalhes
         if (currentTab === 'movies') {
-            headerRow.innerHTML = `<th>Filme</th><th>Direção</th><th>Gênero</th><th>Lançamento</th><th>Visto</th><th>Data</th><th>Onde</th><th>Avaliar</th><th>Ações</th>`;
+            if (showMovieDetails) {
+                headerRow.innerHTML = `<th>Filme</th><th>Direção</th><th>Gênero</th><th>Lançamento</th><th>Visto</th><th>Data</th><th>Onde</th><th>Avaliação</th><th>Ações</th>`;
+            } else {
+                headerRow.innerHTML = `<th>Filme</th><th>Visto</th><th>Avaliação</th><th>Ações</th>`;
+            }
         } else {
             headerRow.innerHTML = `<th>Livro</th><th>Autor</th><th>Editora</th><th>Edição</th><th>Lido</th><th>Ações</th>`;
         }
 
-        // Atualiza as capas dos últimos filmes vistos automaticamente
         updatePostersGallery();
 
         currentList.forEach(item => {
@@ -766,26 +842,38 @@
 
             const tr = document.createElement('tr');
 
-            // Renderização dos dados de Filmes na ordem correta
             if (currentTab === 'movies') {
                 let ratingOptions = '<option value=""></option>';
                 for (let i = 1; i <= 10; i++) {
                     ratingOptions += `<option value="${i}" ${item.rating == i ? 'selected' : ''}>${i}</option>`;
                 }
-                tr.innerHTML = `
-                    <td><strong>${item.title || '-'}</strong></td>
-                    <td>${item.director || '-'}</td>
-                    <td>${item.genre || '-'}</td>
-                    <td>${item.year || '-'}</td>
-                    <td><span class="badge ${item.seen ? 'badge-seen' : 'badge-not-seen'}" style="cursor:pointer;" onclick="toggleSeen(${item.id})">${item.seen ? 'Visto' : 'Quero ver'}</span></td>
-                    <td>${item.seen ? formatDateToBR(item.date) : '-'}</td>
-                    <td>${item.seen ? (item.where || '-') : '-'}</td>
-                    <td><select class="select-rating" onchange="changeRating(${item.id}, this.value)">${ratingOptions}</select></td>
-                    <td class="actions">
-                        <button class="btn btn-sm btn-edit" onclick="editItem(${item.id})">Editar</button>
-                        <button class="btn btn-sm btn-danger" onclick="deleteItem(${item.id})">Excluir</button>
-                    </td>
-                `;
+                
+                if (showMovieDetails) {
+                    tr.innerHTML = `
+                        <td><strong>${item.title || '-'}</strong></td>
+                        <td>${item.director || '-'}</td>
+                        <td>${item.genre || '-'}</td>
+                        <td>${item.year || '-'}</td>
+                        <td><span class="badge ${item.seen ? 'badge-seen' : 'badge-not-seen'}" style="cursor:pointer;" onclick="toggleSeen(${item.id})">${item.seen ? 'Visto' : 'Quero ver'}</span></td>
+                        <td>${item.seen ? formatDateToBR(item.date) : '-'}</td>
+                        <td>${item.seen ? (item.where || '-') : '-'}</td>
+                        <td><select class="select-rating" onchange="changeRating(${item.id}, this.value)">${ratingOptions}</select></td>
+                        <td class="actions">
+                            <button class="btn btn-sm btn-edit" onclick="editItem(${item.id})">Editar</button>
+                            <button class="btn btn-sm btn-danger" onclick="deleteItem(${item.id})">Excluir</button>
+                        </td>
+                    `;
+                } else {
+                    tr.innerHTML = `
+                        <td><strong>${item.title || '-'}</strong></td>
+                        <td><span class="badge ${item.seen ? 'badge-seen' : 'badge-not-seen'}" style="cursor:pointer;" onclick="toggleSeen(${item.id})">${item.seen ? 'Visto' : 'Quero ver'}</span></td>
+                        <td><select class="select-rating" onchange="changeRating(${item.id}, this.value)">${ratingOptions}</select></td>
+                        <td class="actions">
+                            <button class="btn btn-sm btn-edit" onclick="editItem(${item.id})">Editar</button>
+                            <button class="btn btn-sm btn-danger" onclick="deleteItem(${item.id})">Excluir</button>
+                        </td>
+                    `;
+                }
             } else {
                 tr.innerHTML = `
                     <td><strong>${item.title || '-'}</strong></td>
@@ -918,6 +1006,9 @@
             btnSubmit.textContent = "Atualizar Livro";
         }
         btnCancel.style.display = "inline-block";
+        
+        // Rola automaticamente a página para a área de edição
+        document.querySelector('.form-section').scrollIntoView({ behavior: 'smooth' });
     }
 
     window.deleteItem = function(id) {
