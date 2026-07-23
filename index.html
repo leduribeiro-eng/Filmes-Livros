@@ -376,6 +376,12 @@
             padding: 20px;
             border-radius: 8px;
         }
+        /* Ajuste específico para habilitar scroll vertical condicional na caixa "Onde" */
+        .retro-box-scrollable {
+            max-height: 250px;
+            overflow-y: auto;
+            padding-right: 5px;
+        }
         .retro-box h4 {
             font-size: 16px;
             color: var(--primary);
@@ -423,6 +429,7 @@
             margin-top: 30px;
             text-align: center;
             padding: 20px;
+            position: relative;
         }
         .btn-share {
             background: #2ec4b6;
@@ -440,6 +447,42 @@
         }
         .btn-share:hover {
             background: #25a194;
+        }
+        /* Menu de Opções de Compartilhamento */
+        .share-options-menu {
+            display: none;
+            position: absolute;
+            bottom: 100%;
+            left: 50%;
+            transform: translateX(-50%);
+            background: white;
+            border: 1px solid #cbd5e1;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+            border-radius: 8px;
+            padding: 10px;
+            margin-bottom: 10px;
+            z-index: 10;
+            width: 220px;
+            text-align: left;
+        }
+        .share-options-menu.active {
+            display: block;
+        }
+        .share-option-item {
+            display: block;
+            width: 100%;
+            padding: 8px 12px;
+            background: none;
+            border: none;
+            text-align: left;
+            font-size: 14px;
+            font-weight: 600;
+            color: var(--primary);
+            cursor: pointer;
+            border-radius: 4px;
+        }
+        .share-option-item:hover {
+            background: #f1f5f9;
         }
         @media (max-width: 600px) {
             .retro-grid-2x2 {
@@ -516,12 +559,19 @@
             </div>
             <div class="retro-box">
                 <h4>Onde</h4>
-                <div id="retro-top-where"></div>
+                <div class="retro-box-scrollable" id="retro-top-where"></div>
             </div>
         </div>
 
         <div class="share-container">
-            <button type="button" class="btn-share" onclick="shareRetrospectiveImage()">
+            <!-- Menu flutuante de redes sociais -->
+            <div class="share-options-menu" id="share-options-menu">
+                <button type="button" class="share-option-item" onclick="shareToSocial('whatsapp')">💬 WhatsApp</button>
+                <button type="button" class="share-option-item" onclick="shareToSocial('instagram')">📸 Instagram / Stories</button>
+                <button type="button" class="share-option-item" onclick="shareToSocial('twitter')">🐦 X (Twitter)</button>
+                <button type="button" class="share-option-item" onclick="shareToSocial('copy')">📋 Copiar Link / Texto</button>
+            </div>
+            <button type="button" class="btn-share" onclick="toggleShareMenu()">
                 <span>🔗</span> Compartilhar meus filmes
             </button>
         </div>
@@ -1084,19 +1134,41 @@
                 whereCounts[m.where] = (whereCounts[m.where] || 0) + 1;
             }
         });
+        // Modificado para listar todos os locais ordenados pela quantidade (sem limite de top 3)
         const sortedWhere = Object.entries(whereCounts).sort((a, b) => b[1] - a[1]);
-        const finalWhereList = sortedWhere.length === 2 ? sortedWhere : sortedWhere.slice(0, 3);
         
         const whereDiv = document.getElementById('retro-top-where');
-        whereDiv.innerHTML = finalWhereList.length ? finalWhereList.map(([place, count], i) => `
+        whereDiv.innerHTML = sortedWhere.length ? sortedWhere.map(([place, count], i) => `
             <div class="month-item" style="margin-bottom: 8px;">
                 <span>${i+1}. ${place}</span> <strong>${count} vez(es)</strong>
             </div>
         `).join('') : '<p style="font-size:13px; color:#64748b;">Nenhum local registrado.</p>';
     }
 
-    function shareRetrospectiveImage() {
-        alert("Funcionalidade de captura para compartilhamento em imagem acionada!");
+    function toggleShareMenu() {
+        const menu = document.getElementById('share-options-menu');
+        menu.classList.toggle('active');
+    }
+
+    function shareToSocial(platform) {
+        toggleShareMenu();
+        const selectedYear = document.getElementById('retro-year-select').value;
+        const text = `Confira a minha retrospectiva de filmes de ${selectedYear}! 🎬✨`;
+        const url = window.location.href;
+
+        if (platform === 'whatsapp') {
+            window.open(`https://api.whatsapp.com/send?text=${encodeURIComponent(text + ' ' + url)}`, '_blank');
+        } else if (platform === 'twitter') {
+            window.open(`https://twitter.com/intent/tweet?text=${encodeURIComponent(text)}&url=${encodeURIComponent(url)}`, '_blank');
+        } else if (platform === 'instagram') {
+            alert("No Instagram/Stories, tire um print ou salve os dados da sua retrospectiva para compartilhar na sua rede!");
+        } else if (platform === 'copy') {
+            navigator.clipboard.writeText(`${text} ${url}`).then(() => {
+                alert("Link e texto copiados para a área de transferência!");
+            }).catch(() => {
+                alert("Não foi possível copiar automaticamente.");
+            });
+        }
     }
 
     function renderList() {
