@@ -82,6 +82,78 @@
             border-radius: 20px;
         }
 
+        /* Estilos da Seção de Capas (Carrossel no Topo) */
+        .recent-posters-section {
+            margin-bottom: 20px;
+            background: #fdfdfd;
+            border: 1px dashed #cbd5e1;
+            padding: 15px;
+            border-radius: 10px;
+            overflow: hidden;
+        }
+        .recent-posters-section h3 {
+            font-size: 14px;
+            color: var(--primary);
+            margin-bottom: 10px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        .posters-container {
+            display: flex;
+            gap: 12px;
+            overflow-x: auto;
+            scroll-behavior: smooth;
+            -webkit-overflow-scrolling: touch;
+            padding-bottom: 5px;
+        }
+        .poster-card {
+            background: #f1f5f9;
+            border-radius: 6px;
+            overflow: hidden;
+            aspect-ratio: 2/3;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+            flex: 0 0 calc((100% - 36px) / 4); 
+            min-width: 80px;
+        }
+        @media (max-width: 600px) {
+            .poster-card {
+                flex: 0 0 calc((100% - 24px) / 3.5);
+            }
+        }
+        .poster-card img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+        .poster-card .poster-title-fallback {
+            padding: 8px;
+            font-size: 11px;
+            font-weight: bold;
+            text-align: center;
+            color: #475569;
+        }
+
+        /* Link Retrospectiva */
+        .retro-link-container {
+            margin-bottom: 20px;
+            text-align: left;
+        }
+        .retro-link {
+            font-size: 16px;
+            font-weight: bold;
+            color: #0369a1;
+            text-decoration: underline;
+            cursor: pointer;
+            background: none;
+            border: none;
+            padding: 0;
+        }
+
         /* Formulário Ajustado para Celular */
         .form-section {
             background: #f8f9fa;
@@ -221,65 +293,7 @@
 
         .checkbox-group input { width: 20px; height: 20px; cursor: pointer; }
 
-        /* Estilos da Seção de Capas Recentes Ajustado para Deslizar */
-        .recent-posters-section {
-            margin-bottom: 15px;
-            background: #fdfdfd;
-            border: 1px dashed #cbd5e1;
-            padding: 15px;
-            border-radius: 10px;
-            overflow: hidden;
-        }
-        .recent-posters-section h3 {
-            font-size: 14px;
-            color: var(--primary);
-            margin-bottom: 10px;
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-        }
-        .posters-container {
-            display: flex;
-            gap: 12px;
-            overflow-x: auto;
-            scroll-behavior: smooth;
-            -webkit-overflow-scrolling: touch;
-            padding-bottom: 5px;
-        }
-        /* Força cada card a ocupar exatamente o tamanho proporcional para caberem 4 na tela */
-        .poster-card {
-            background: #f1f5f9;
-            border-radius: 6px;
-            overflow: hidden;
-            aspect-ratio: 2/3;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            position: relative;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
-            flex: 0 0 calc((100% - 36px) / 4); 
-            min-width: 80px;
-        }
-        @media (max-width: 600px) {
-            /* Em telas muito pequenas de celular, exibe 3.5 itens para sinalizar que dá para deslizar */
-            .poster-card {
-                flex: 0 0 calc((100% - 24px) / 3.5);
-            }
-        }
-        .poster-card img {
-            width: 100%;
-            height: 100%;
-            object-fit: cover;
-        }
-        .poster-card .poster-title-fallback {
-            padding: 8px;
-            font-size: 11px;
-            font-weight: bold;
-            text-align: center;
-            color: #475569;
-        }
-
-        /* Container do Botão de Detalhes alinhado à direita entre o carrossel e a tabela */
+        /* Container do Botão de Detalhes */
         .details-toggle-container {
             display: flex;
             justify-content: flex-end;
@@ -333,6 +347,105 @@
             background: #fff;
             outline: none;
         }
+
+        /* Estilos da Retrospectiva */
+        .retrospective-view {
+            display: none;
+            margin-top: 20px;
+        }
+        .retrospective-view.active {
+            display: block;
+        }
+        .retro-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+            gap: 15px;
+        }
+        .retro-grid-2x2 {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+            margin-top: 20px;
+        }
+        .retro-box {
+            background: #f8f9fa;
+            border: 1px solid #e9ecef;
+            padding: 20px;
+            border-radius: 8px;
+        }
+        .retro-box h4 {
+            font-size: 16px;
+            color: var(--primary);
+            margin-bottom: 15px;
+            text-transform: uppercase;
+            border-bottom: 2px solid var(--bg);
+            padding-bottom: 8px;
+        }
+        .months-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+        }
+        .month-item {
+            font-size: 14px;
+            display: flex;
+            justify-content: space-between;
+            background: #fff;
+            padding: 8px 12px;
+            border-radius: 4px;
+            border: 1px solid #e2e8f0;
+        }
+        .eval-columns {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+        }
+        .eval-subcol h5 {
+            font-size: 14px;
+            color: var(--secondary);
+            margin-bottom: 8px;
+            text-transform: uppercase;
+        }
+        .eval-list {
+            list-style: none;
+            font-size: 13px;
+        }
+        .eval-list li {
+            display: flex;
+            justify-content: space-between;
+            padding: 6px 0;
+            border-bottom: 1px dashed #e2e8f0;
+        }
+        .share-container {
+            margin-top: 30px;
+            text-align: center;
+            padding: 20px;
+        }
+        .btn-share {
+            background: #2ec4b6;
+            color: white;
+            padding: 12px 24px;
+            font-size: 16px;
+            border-radius: 8px;
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+            text-decoration: none;
+            font-weight: bold;
+            cursor: pointer;
+            border: none;
+        }
+        .btn-share:hover {
+            background: #25a194;
+        }
+        @media (max-width: 600px) {
+            .retro-grid-2x2 {
+                grid-template-columns: 1fr;
+            }
+        }
     </style>
 </head>
 <body>
@@ -345,6 +458,74 @@
         </div>
         <div id="sync-status">Sincronizando com a nuvem...</div>
     </header>
+
+    <!-- CARROSSEL NO TOPO (Logo acima de ADICIONAR FILME) -->
+    <div class="recent-posters-section" id="recent-posters-block" style="display:none;">
+        <h3>Últimos Vistos</h3>
+        <div class="posters-container" id="posters-gallery"></div>
+    </div>
+
+    <!-- LINK RETROSPECTIVA LOGO ABAIXO DO CARROSSEL -->
+    <div class="retro-link-container" id="retro-link-block" style="display:none;">
+        <button type="button" class="retro-link" onclick="openRetrospective()">RESTROSPECTIVA</button>
+    </div>
+
+    <!-- SEÇÃO PRINCIPAL DA RETROSPECTIVA (Ocultada por padrão) -->
+    <div id="retrospective-section" class="retrospective-view">
+        <div class="retro-header">
+            <button class="btn btn-edit" onclick="closeRetrospective()">← Voltar para a Página Principal</button>
+            <div class="form-group" style="min-width: 200px;">
+                <label for="retro-year-select">Ano da Retrospectiva:</label>
+                <select id="retro-year-select" class="select-filter" onchange="renderRetrospectiveData()"></select>
+            </div>
+        </div>
+
+        <div class="recent-posters-section" style="display:block; margin-bottom: 20px;">
+            <h3>Filmes Assistidos no Ano</h3>
+            <div class="posters-container" id="retro-posters-gallery"></div>
+        </div>
+
+        <!-- Espaço 1 e Espaço 2 -->
+        <div class="retro-grid-2x2">
+            <div class="retro-box">
+                <h4>Filmes/Mês</h4>
+                <div class="months-grid" id="retro-months-list"></div>
+            </div>
+            <div class="retro-box">
+                <h4>Top Gêneros</h4>
+                <div id="retro-top-genres"></div>
+            </div>
+        </div>
+
+        <hr style="margin: 25px 0; border: 0; border-top: 2px solid #cbd5e1;">
+
+        <!-- Espaço 3 e Espaço 4 -->
+        <div class="retro-grid-2x2">
+            <div class="retro-box">
+                <h4>AVALIAÇÕES</h4>
+                <div class="eval-columns">
+                    <div class="eval-subcol">
+                        <h5>Melhores</h5>
+                        <ul class="eval-list" id="retro-best-movies"></ul>
+                    </div>
+                    <div class="eval-subcol">
+                        <h5>Piores</h5>
+                        <ul class="eval-list" id="retro-worst-movies"></ul>
+                    </div>
+                </div>
+            </div>
+            <div class="retro-box">
+                <h4>Onde</h4>
+                <div id="retro-top-where"></div>
+            </div>
+        </div>
+
+        <div class="share-container">
+            <button type="button" class="btn-share" onclick="shareRetrospectiveImage()">
+                <span>🔗</span> Compartilhar meus filmes
+            </button>
+        </div>
+    </div>
 
     <div class="form-section">
         <h2 id="form-title">ADICIONAR FILME</h2>
@@ -406,8 +587,7 @@
                 <div class="full-row-break">
                     <div class="form-group">
                         <label id="lbl-seen" for="seen">Visto</label>
-                        <select id="seen" onchange="toggleFormInputs()">
-                            </select>
+                        <select id="seen" onchange="toggleFormInputs()"></select>
                     </div>
                     <div class="form-group variant-movie">
                         <label for="date">Data</label>
@@ -429,8 +609,7 @@
         <div class="filter-section-bg">
             <div class="filter-row">
                 <span class="filter-label">Filtrar por:</span>
-                <select id="filter-column" class="select-filter" onchange="updateFilterValuesSelect()">
-                    </select>
+                <select id="filter-column" class="select-filter" onchange="updateFilterValuesSelect()"></select>
                 <select id="filter-value" class="select-filter" onchange="renderList()" disabled>
                     <option value="">Selecione uma opção...</option>
                 </select>
@@ -449,12 +628,6 @@
         </div>
     </div>
 
-    <div class="recent-posters-section" id="recent-posters-block" style="display:none;">
-        <h3>Últimos Vistos</h3>
-        <div class="posters-container" id="posters-gallery">
-            </div>
-    </div>
-
     <div class="details-toggle-container">
         <button type="button" class="btn btn-sm btn-edit" id="btn-toggle-details" onclick="toggleMovieDetails()">Exibir detalhes</button>
     </div>
@@ -462,8 +635,7 @@
     <div class="table-responsive">
         <table id="data-table">
             <thead>
-                <tr id="table-header">
-                    </tr>
+                <tr id="table-header"></tr>
             </thead>
             <tbody id="data-list"></tbody>
         </table>
@@ -505,11 +677,9 @@
     function formatDateToBR(dateStr) {
         if (!dateStr) return '';
         if (dateStr.includes('/')) return dateStr; 
-        
         if (dateStr.includes('T')) {
             dateStr = dateStr.split('T')[0];
         }
-        
         const parts = dateStr.split('-');
         if (parts.length === 3) return `${parts[2]}/${parts[1]}/${parts[0]}`;
         return dateStr;
@@ -542,7 +712,6 @@
         return '';
     }
 
-    // CARREGAMENTO AUTOMÁTICO INICIAL (GET) DA PLANILHA DO GOOGLE
     function loadFromGoogleSheets() {
         syncStatus.textContent = "Baixando dados da nuvem...";
         fetch(GOOGLE_SCRIPT_URL)
@@ -700,23 +869,29 @@
         if (filterColumnSelect.value === 'rating') updateFilterValuesSelect();
     }
 
-    // Função para processar e atualizar as capas dinâmicas (OMDb API com fallback para iTunes Search API) ordenadas por data
     function updatePostersGallery() {
         const block = document.getElementById('recent-posters-block');
         const gallery = document.getElementById('posters-gallery');
+        const retroLinkBlock = document.getElementById('retro-link-block');
         
         if (currentTab !== 'movies') {
             block.style.display = 'none';
+            if (retroLinkBlock) retroLinkBlock.style.display = 'none';
             return;
         }
         
-        // Filtra filmes vistos, ordena por data (do visto por último até o mais antigo) e pega os 10 primeiros
         const seenMovies = movies
             .filter(m => m.seen)
-            .sort((a, b) => parseDateForSort(b.date) - parseDateForSort(a.date))
-            .slice(0, 10);
+            .sort((a, b) => parseDateForSort(b.date) - parseDateForSort(a.date));
         
-        if (seenMovies.length === 0) {
+        if (seenMovies.length > 0 && retroLinkBlock) {
+            retroLinkBlock.style.display = 'block';
+        } else if (retroLinkBlock) {
+            retroLinkBlock.style.display = 'none';
+        }
+
+        const topSeenMovies = seenMovies.slice(0, 10);
+        if (topSeenMovies.length === 0) {
             block.style.display = 'none';
             return;
         }
@@ -724,7 +899,7 @@
         block.style.display = 'block';
         gallery.innerHTML = '';
         
-        seenMovies.forEach(movie => {
+        topSeenMovies.forEach(movie => {
             const card = document.createElement('div');
             card.className = 'poster-card';
             
@@ -736,7 +911,6 @@
             const queryTitle = encodeURIComponent(movie.title);
             const queryYear = movie.year ? `&y=${movie.year}` : '';
             
-            // 1ª Opção: OMDb API
             fetch(`https://www.omdbapi.com/?t=${queryTitle}${queryYear}&apikey=d9e7b14b`)
                 .then(res => res.json())
                 .then(data => {
@@ -749,7 +923,6 @@
                             card.appendChild(img);
                         };
                     } else {
-                        // 2ª Opção (Fallback): iTunes Search API caso a primeira falhe
                         fetch(`https://itunes.apple.com/search?term=${queryTitle}&media=movie&entity=movie&limit=1`)
                             .then(res => res.json())
                             .then(itunesData => {
@@ -767,27 +940,163 @@
                             .catch(() => {});
                     }
                 })
-                .catch(() => {
-                    // Fallback de rede para iTunes caso a 1ª opção falhe na requisição
-                    fetch(`https://itunes.apple.com/search?term=${queryTitle}&media=movie&entity=movie&limit=1`)
-                        .then(res => res.json())
-                        .then(itunesData => {
-                            if (itunesData && itunesData.results && itunesData.results.length > 0 && itunesData.results[0].artworkUrl100) {
-                                const posterUrl = itunesData.results[0].artworkUrl100.replace('100x100bb.jpg', '600x600bb.jpg');
-                                const img = document.createElement('img');
-                                img.src = posterUrl;
-                                img.alt = movie.title;
-                                img.onload = () => {
-                                    card.innerHTML = ''; 
-                                    card.appendChild(img);
-                                };
-                            }
-                        })
-                        .catch(() => {});
-                });
+                .catch(() => {});
                 
             gallery.appendChild(card);
         });
+    }
+
+    function openRetrospective() {
+        document.querySelector('.container > header').style.display = 'none';
+        document.querySelector('.form-section').style.display = 'none';
+        document.querySelector('.controls-section').style.display = 'none';
+        document.querySelector('.recent-posters-section').style.display = 'none';
+        document.querySelector('.details-toggle-container').style.display = 'none';
+        document.querySelector('.table-responsive').style.display = 'none';
+        document.getElementById('retro-link-block').style.display = 'none';
+
+        document.getElementById('retrospective-section').classList.add('active');
+
+        const yearsSet = new Set();
+        movies.forEach(m => {
+            if (m.seen && m.date) {
+                const yr = getYearFromDate(m.date);
+                if (yr) yearsSet.add(yr);
+            }
+        });
+
+        const retroYearSelect = document.getElementById('retro-year-select');
+        retroYearSelect.innerHTML = '';
+        Array.from(yearsSet).sort().reverse().forEach(yr => {
+            const opt = document.createElement('option');
+            opt.value = yr;
+            opt.textContent = yr;
+            retroYearSelect.appendChild(opt);
+        });
+
+        renderRetrospectiveData();
+    }
+
+    function closeRetrospective() {
+        document.querySelector('.container > header').style.display = 'flex';
+        document.querySelector('.form-section').style.display = 'block';
+        document.querySelector('.controls-section').style.display = 'flex';
+        document.querySelector('.details-toggle-container').style.display = 'flex';
+        document.querySelector('.table-responsive').style.display = 'block';
+        document.getElementById('retro-link-block').style.display = 'block';
+
+        document.getElementById('retrospective-section').classList.remove('active');
+        updatePostersGallery();
+    }
+
+    function renderRetrospectiveData() {
+        const selectedYear = document.getElementById('retro-year-select').value;
+        const yearMovies = movies.filter(m => m.seen && m.date && getYearFromDate(m.date) === selectedYear);
+
+        const gallery = document.getElementById('retro-posters-gallery');
+        gallery.innerHTML = '';
+        yearMovies.sort((a, b) => parseDateForSort(b.date) - parseDateForSort(a.date)).forEach(movie => {
+            const card = document.createElement('div');
+            card.className = 'poster-card';
+            card.style.flex = window.innerWidth <= 600 ? '0 0 calc((100% - 24px) / 3)' : '0 0 calc((100% - 48px) / 5)';
+            
+            const titleFallback = document.createElement('div');
+            titleFallback.className = 'poster-title-fallback';
+            titleFallback.textContent = movie.title;
+            card.appendChild(titleFallback);
+
+            const queryTitle = encodeURIComponent(movie.title);
+            fetch(`https://www.omdbapi.com/?t=${queryTitle}&apikey=d9e7b14b`)
+                .then(res => res.json())
+                .then(data => {
+                    if (data && data.Poster && data.Poster !== 'N/A') {
+                        const img = document.createElement('img');
+                        img.src = data.Poster;
+                        img.alt = movie.title;
+                        img.onload = () => { card.innerHTML = ''; card.appendChild(img); };
+                    }
+                }).catch(() => {});
+            gallery.appendChild(card);
+        });
+
+        const monthsNames = ["JAN", "FEV", "MAR", "ABR", "MAI", "JUN", "JUL", "AGO", "SET", "OUT", "NOV", "DEZ"];
+        const monthCounts = Array(12).fill(0);
+        yearMovies.forEach(m => {
+            const iso = formatDateToISO(m.date);
+            if (iso) {
+                const monthIndex = new Date(iso).getMonth();
+                if (!isNaN(monthIndex)) monthCounts[monthIndex]++;
+            }
+        });
+
+        const monthsContainer = document.getElementById('retro-months-list');
+        monthsContainer.innerHTML = '';
+        
+        const col1Months = [0, 1, 2, 3, 4, 5];
+        const col2Months = [6, 7, 8, 9, 10, 11];
+        
+        let monthsHtml = '<div style="display:flex; flex-direction:column; gap:8px;">';
+        col1Months.forEach(idx => {
+            monthsHtml += `<div class="month-item"><span>${monthsNames[idx]}</span> <strong>${monthCounts[idx]}</strong></div>`;
+        });
+        monthsHtml += '</div><div style="display:flex; flex-direction:column; gap:8px;">';
+        col2Months.forEach(idx => {
+            monthsHtml += `<div class="month-item"><span>${monthsNames[idx]}</span> <strong>${monthCounts[idx]}</strong></div>`;
+        });
+        monthsHtml += '</div>';
+        monthsContainer.innerHTML = monthsHtml;
+
+        const genreCounts = {};
+        yearMovies.forEach(m => {
+            if (m.genre) {
+                genreCounts[m.genre] = (genreCounts[m.genre] || 0) + 1;
+            }
+        });
+        const sortedGenres = Object.entries(genreCounts).sort((a, b) => b[1] - a[1]).slice(0, 3);
+        const genresDiv = document.getElementById('retro-top-genres');
+        genresDiv.innerHTML = sortedGenres.length ? sortedGenres.map(([genre, count], i) => `
+            <div class="month-item" style="margin-bottom: 8px;">
+                <span>${i+1}. ${genre}</span> <strong>${count} filme(s)</strong>
+            </div>
+        `).join('') : '<p style="font-size:13px; color:#64748b;">Nenhum gênero registrado.</p>';
+
+        const ratedMovies = yearMovies.filter(m => m.rating !== '' && m.rating !== undefined && m.rating !== null);
+        
+        const bestSorted = [...ratedMovies].sort((a, b) => {
+            if (Number(b.rating) !== Number(a.rating)) return Number(b.rating) - Number(a.rating);
+            return parseDateForSort(a.date) - parseDateForSort(b.date);
+        }).slice(0, 5);
+
+        const worstSorted = [...ratedMovies].sort((a, b) => {
+            if (Number(a.rating) !== Number(b.rating)) return Number(a.rating) - Number(b.rating);
+            return parseDateForSort(a.date) - parseDateForSort(b.date);
+        }).slice(0, 5);
+
+        const bestList = document.getElementById('retro-best-movies');
+        bestList.innerHTML = bestSorted.length ? bestSorted.map(m => `<li><span>${m.title}</span> <strong>${m.rating}</strong></li>`).join('') : '<li style="color:#64748b;">Sem avaliações</li>';
+
+        const worstList = document.getElementById('retro-worst-movies');
+        worstList.innerHTML = worstSorted.length ? worstSorted.map(m => `<li><span>${m.title}</span> <strong>${m.rating}</strong></li>`).join('') : '<li style="color:#64748b;">Sem avaliações</li>';
+
+        const whereCounts = {};
+        yearMovies.forEach(m => {
+            if (m.where) {
+                whereCounts[m.where] = (whereCounts[m.where] || 0) + 1;
+            }
+        });
+        const sortedWhere = Object.entries(whereCounts).sort((a, b) => b[1] - a[1]);
+        const finalWhereList = sortedWhere.length === 2 ? sortedWhere : sortedWhere.slice(0, 3);
+        
+        const whereDiv = document.getElementById('retro-top-where');
+        whereDiv.innerHTML = finalWhereList.length ? finalWhereList.map(([place, count], i) => `
+            <div class="month-item" style="margin-bottom: 8px;">
+                <span>${i+1}. ${place}</span> <strong>${count} vez(es)</strong>
+            </div>
+        `).join('') : '<p style="font-size:13px; color:#64748b;">Nenhum local registrado.</p>';
+    }
+
+    function shareRetrospectiveImage() {
+        alert("Funcionalidade de captura para compartilhamento em imagem acionada!");
     }
 
     function renderList() {
@@ -802,12 +1111,10 @@
         
         let currentList = currentTab === 'movies' ? [...movies] : [...books];
 
-        // Se "Filmes Vistos" estiver marcado, ordena do visto por último até o mais antigo segundo a coluna data
         if (currentTab === 'movies' && showOnlySeen) {
             currentList.sort((a, b) => parseDateForSort(b.date) - parseDateForSort(a.date));
         }
 
-        // Definição das colunas da tabela de acordo com o modo de exibição de detalhes
         if (currentTab === 'movies') {
             if (showMovieDetails) {
                 headerRow.innerHTML = `<th>Filme</th><th>Direção</th><th>Gênero</th><th>Lançamento</th><th>Visto</th><th>Data</th><th>Onde</th><th>Avaliação</th><th>Ações</th>`;
@@ -1006,8 +1313,6 @@
             btnSubmit.textContent = "Atualizar Livro";
         }
         btnCancel.style.display = "inline-block";
-        
-        // Rola automaticamente a página para a área de edição
         document.querySelector('.form-section').scrollIntoView({ behavior: 'smooth' });
     }
 
